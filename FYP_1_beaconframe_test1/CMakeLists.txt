@@ -9,13 +9,13 @@ set(BOARD nrf52840dk_nrf52840)
 #set(BOARD nucleo_f429zi)
 
 find_package(Zephyr)
-project(beaconframe_tx_test1) ####
+project(FYP_1_beaconframe_test1) ####
 
 #add_definitions(-DTX_WITH_CCA)
 
 target_sources(app PRIVATE ../../main.c)
 target_sources(app PRIVATE ../../config_options.c)
-target_sources(app PRIVATE beaconframe_tx_test1.c)
+target_sources(app PRIVATE FYP_1_beaconframe_test1.c)
 
 target_sources(app PRIVATE ../../decadriver/deca_device.c)
 
