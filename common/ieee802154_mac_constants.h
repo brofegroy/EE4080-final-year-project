@@ -136,3 +136,5 @@
 
 //--------------------------------------------------------
 #pragma endregion Beacon Pending Address Specification Field
+
+#endif //IEEE802154_MAC_CONSTANTS_H

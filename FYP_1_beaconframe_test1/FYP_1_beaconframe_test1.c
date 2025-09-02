@@ -15,7 +15,7 @@
 
 #define LOG_LEVEL 3
 #include <zephyr/logging/log.h>
-LOG_MODULE_REGISTER(APP_NAME);
+LOG_MODULE_REGISTER(FYP_1_beaconframe_test1);
 //-----------------
 #include "../common/ieee802154_mac_constants.h"
 
@@ -185,7 +185,7 @@ int app_main(void)
             //no beacon payload
             FCS_LEN;
 
-        static uint8_t tx_msg[] = {
+        uint8_t tx_msg[] = {
             (uint8_t)(beacon_frame_control_field & 0xFF),                        // FCF LSB
             (uint8_t)((beacon_frame_control_field >> 8) & 0xFF),                 // FCF MSB
             beacon_seq_num_field,                                                // Sequence number
@@ -227,16 +227,16 @@ int app_main(void)
         }
         else
         {
-            /* If DW IC detected the preamble, device will be in IDLE */
-            tx_sleep_period = next_backoff_interval; /* set the TX sleep period */
+            // /* If DW IC detected the preamble, device will be in IDLE */
+            // tx_sleep_period = next_backoff_interval; /* set the TX sleep period */
 
-            next_backoff_interval++; /* If failed to transmit, increase backoff 
-                                      * and try again.
-                                      * In a real implementation the back-off 
-                                      * is typically a randomised period
-                                      * whose range is an exponentially related 
-                                      * to the number of successive failures.
-                                      * See https://en.wikipedia.org/wiki/Exponential_backoff */
+            // next_backoff_interval++; /* If failed to transmit, increase backoff 
+            //                           * and try again.
+            //                           * In a real implementation the back-off 
+            //                           * is typically a randomised period
+            //                           * whose range is an exponentially related 
+            //                           * to the number of successive failures.
+            //                           * See https://en.wikipedia.org/wiki/Exponential_backoff */
         }
 
         /* Clear TX frame sent event. */

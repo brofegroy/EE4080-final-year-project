@@ -4,9 +4,11 @@ set(DTS_ROOT   "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 set(BOARD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 set(SHIELD qorvo_dwm3000)
 
-set(BOARD nrf52840dk_nrf52840)
+#set(BOARD nrf52840dk_nrf52840)
 #set(BOARD nrf52dk_nrf52832)
 #set(BOARD nucleo_f429zi)
+set(BOARD nrf5340dk_nrf5340_cpuapp)
+
 
 find_package(Zephyr)
 project(FYP_1_beaconframe_test1) ####
@@ -36,3 +38,4 @@ target_include_directories(app PRIVATE ../../shared_data/)
 
 #--------------------------------------------------------
 target_include_directories(app PRIVATE ../common/)
+target_compile_options(app PRIVATE -Wno-unknown-pragmas)
