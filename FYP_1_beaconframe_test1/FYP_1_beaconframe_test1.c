@@ -77,10 +77,6 @@ static dwt_config_t config = {
 
 int tx_sleep_period; /* Sleep period until the next TX attempt */
 
-// beacon frame taken as ALOHA, always clear, no need CCA
-// /* Next backoff in the event of busy channel detection by this pseudo CCA algorithm */
-// int next_backoff_interval = INITIAL_BACKOFF_PERIOD;
-
 /* holds copy of status register */
 uint32_t status_reg = 0;
 uint32_t status_regh = 0; /* holds the high 32 bits of SYS_STATUS_HI */
@@ -198,8 +194,6 @@ int app_main(void)
             (uint8_t)((beacon_addressing_field_destination_address >> 8) & 0xFF) // Dest addr MSB
         };
 
-        printk("hi1");
-
         if (SYS_STATUS_TXFRS_BIT_MASK)
         {
             /* Write frame data to DW3000 and prepare transmission..*/
@@ -220,12 +214,8 @@ int app_main(void)
             LOG_HEXDUMP_INF(tx_msg, sizeof(tx_msg), "TX frame");
         }
 
-        printk("hi2");
-
         while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
         { /* spin */ };
-
-        printk("hi3");
 
         /* Clear TX frame sent event. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
