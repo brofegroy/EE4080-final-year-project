@@ -9,7 +9,6 @@
 // @suppress "Cannot open source file"
 #include <zephyr/kernel.h>
 #endif
-#include <zephyr/sys/printk.h>
 
 #define APP_NAME "FYP_1_beaconframe_test1"
 
@@ -41,7 +40,7 @@ only generating the base beacon frame.
 
 /* Default communication configuration. We use default non-STS DW mode. */
 static dwt_config_t config = {
-    5,               /* Channel number. */
+    9,               /* Channel number. */
     DWT_PLEN_128,    /* Preamble length. Used in TX only. */
     DWT_PAC8,        /* Preamble acquisition chunk size. Used in RX only. */
     9,               /* TX preamble code. Used in TX only. */
@@ -63,12 +62,9 @@ static dwt_config_t config = {
 /* Index to access to sequence number of the blink frame in the tx_msg array. */
 #define BLINK_FRAME_SN_IDX 1
 
-/* The real length that is going to be transmitted */
-#define FRAME_LENGTH    (sizeof(tx_msg)+FCS_LEN) 
-
 /* Inter-frame delay period, in milliseconds.
  * this example will try to transmit a frame every 100 ms*/
-#define TX_DELAY_MS 100
+#define TX_DELAY_MS 1000
 
 // no cca
 // /* Initial backoff period when failed to transmit a frame due to preamble detection. */
@@ -92,8 +88,9 @@ uint32_t status_regh = 0; /* holds the high 32 bits of SYS_STATUS_HI */
 /* Values for the PG_DELAY and TX_POWER registers reflect the bandwidth and 
  * power of the spectrum at the current temperature. 
  * These values can be calibrated prior to taking reference measurements. 
- * See NOTE 3 below. */
+* See NOTE 3 below. */
 extern dwt_txconfig_t txconfig_options;
+
 
 int app_main(void)
 {
@@ -118,6 +115,11 @@ int app_main(void)
         LOG_ERR("INIT FAILED");
         while (1) { /* spin */ };
     }
+
+    // txconfig_options.power = 0x00fefefe;   // was 0x00fe0000
+    // printk("txconfig_option.power = %x \n", txconfig_options.power);
+    // printk("txconfig_option.delay = %x \n", txconfig_options.PGdly);
+    // printk("txconfig_option.count = %x \n", txconfig_options.PGcount);
 
     /* Enabling LEDs here for debug so that for each TX the D1 LED will flash
      * on DW3000 red eval-shield boards. */
@@ -146,6 +148,9 @@ int app_main(void)
     *     - byte 10/11: frame check-sum, automatically set/added by DW3000.  */
     // static uint8_t tx_msg[] = {beacon_fcf, 0, 'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E'};
 
+    //Forming the initial Sequence number of the frame
+    uint8_t beacon_seq_num_field = 0;
+
     /* Loop forever sending BEACON frames periodically. */
     while(1)
     {
@@ -163,9 +168,6 @@ int app_main(void)
             E002F9B9_MAC__FCF__DEST_ADDR_MODE_SHORT_10 | // beacon frames not require destination
             E002F9B9_MAC__FCF__FRAME_VERSION_2020_10   | // self explanatory
             E002F9B9_MAC__FCF__SRC_ADDR_MODE_SHORT_01;   // can accomodate 65535 devices
-        
-        //Forming the initial Sequence number of the frame
-        uint8_t beacon_seq_num_field = 0;
 
         //Addressing Field 
         uint16_t beacon_addressing_field_source_address      = 0;      //assume address of beacon is 0
@@ -177,6 +179,7 @@ int app_main(void)
             sizeof(beacon_frame_control_field) +
             sizeof(beacon_seq_num_field) +
             sizeof(beacon_addressing_field_source_address) +
+            sizeof(beacon_addressing_field_destination_address) +
             //no security header
             //no superframe specification
             //no GTS info
@@ -194,50 +197,35 @@ int app_main(void)
             (uint8_t)(beacon_addressing_field_destination_address & 0xFF),       // Dest addr LSB
             (uint8_t)((beacon_addressing_field_destination_address >> 8) & 0xFF) // Dest addr MSB
         };
-        
-        
-        /* Write frame data to DW3000 and prepare transmission..*/
-        dwt_writetxdata(frame_length - FCS_LEN, tx_msg, 0); /* Zero offset in TX buffer. */
-        dwt_writetxfctrl(FRAME_LENGTH, 0, 0); /* Zero offset in TX buffer, no ranging. */
 
-        /* Start transmission with CCA. The transmission will only start once 
-         * there is no preamble detected within 3 PACs as defined above
-         * e.g. once we get the preamble timeout or TX will be canceled if a 
-         * preamble is detected. */
-        // dwt_starttx(DWT_START_TX_CCA);
+        printk("hi1");
 
-        // /* Poll DW3000 until either TX complete or CCA_FAIL. */
-        // while (!((status_reg = dwt_read32bitreg(SYS_STATUS_ID)) & SYS_STATUS_TXFRS_BIT_MASK))
-        // {
-        //     if ((status_regh = dwt_read32bitreg(SYS_STATUS_HI_ID))& SYS_STATUS_HI_CCA_FAIL_BIT_MASK) {
-        //         break;
-        //     }
-        // }
-
-        if (status_reg & SYS_STATUS_TXFRS_BIT_MASK)
+        if (SYS_STATUS_TXFRS_BIT_MASK)
         {
+            /* Write frame data to DW3000 and prepare transmission..*/
+            dwt_writetxdata(frame_length - FCS_LEN, tx_msg, 0); /* Zero offset in TX buffer. */
+            dwt_writetxfctrl(frame_length, 0, 0); /* Zero offset in TX buffer, no ranging. */
+            /* Start transmission. */ 
+            dwt_starttx(DWT_START_TX_IMMEDIATE);
+
             tx_sleep_period = TX_DELAY_MS; /* sent a frame - set interframe period */
             // next_backoff_interval = INITIAL_BACKOFF_PERIOD; /* set initial backoff period */
 
             /* Increment the blink frame sequence number (modulo 256). */
-            tx_msg[2]++; // increase seq number
+            beacon_seq_num_field++; // increase seq number
+            tx_msg[2]++;
 
             /* Reflect frame number */
             LOG_INF("frame: %d", (int) tx_msg[2]);
+            LOG_HEXDUMP_INF(tx_msg, sizeof(tx_msg), "TX frame");
         }
-        else
-        {
-            // /* If DW IC detected the preamble, device will be in IDLE */
-            // tx_sleep_period = next_backoff_interval; /* set the TX sleep period */
 
-            // next_backoff_interval++; /* If failed to transmit, increase backoff 
-            //                           * and try again.
-            //                           * In a real implementation the back-off 
-            //                           * is typically a randomised period
-            //                           * whose range is an exponentially related 
-            //                           * to the number of successive failures.
-            //                           * See https://en.wikipedia.org/wiki/Exponential_backoff */
-        }
+        printk("hi2");
+
+        while (!(dwt_read32bitreg(SYS_STATUS_ID) & SYS_STATUS_TXFRS_BIT_MASK))
+        { /* spin */ };
+
+        printk("hi3");
 
         /* Clear TX frame sent event. */
         dwt_write32bitreg(SYS_STATUS_ID, SYS_STATUS_TXFRS_BIT_MASK);
