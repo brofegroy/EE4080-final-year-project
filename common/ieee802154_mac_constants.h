@@ -11,6 +11,20 @@
 // how are variable named:
 // E002F9B9_MAC__<octet name>__<bit name>_<value>
 
+#pragma region MAC sublayer constants //IEEE pg 377 8.4.2
+    #define E002F9B9_aBaseSlotDuration              60
+    #define E002F9B9_aGtsDescPersistenceTime        4
+    #define E002F9B9_aMaxLostBeacons                4
+    #define E002F9B9_aMaxSifsFrameSize              18
+    #define E002F9B9_aMinCapLength                  440
+    #define E002F9B9_aNumSuperframeSlots            16
+    #define E002F9B9_aBaseSuperframeDuration        E002F9B9_aBaseSlotDuration * E002F9B9_aNumSuperframeSlots
+    // #define E002F9B9_aUnitBackoffPeriod          aTurnaroundTime + aCcaTime.
+    #define E002F9B9_aRccnBaseSlotDuration          60
+#pragma endregion MAC sublayer constants
+
+
+
 #pragma region Frame Control Field //IEEE pg 162
 //---------------------------------------------------------------
 
