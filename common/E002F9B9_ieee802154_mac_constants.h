@@ -1,10 +1,5 @@
-#ifndef IEEE802154_MAC_CONSTANTS_H
-#define IEEE802154_MAC_CONSTANTS_H
-
-#ifdef namespace_E002F9B9
-#error "namespace E002F9B9" is already used 
-#endif //namespace_E002F9B9
-#define namespace_E002F9B9
+#ifndef E002F9B9_IEEE802154_MAC_CONSTANTS_H
+#define E002F9B9_IEEE802154_MAC_CONSTANTS_H
 
 #include <stdint.h>
 
@@ -151,4 +146,4 @@
 //--------------------------------------------------------
 #pragma endregion Beacon Pending Address Specification Field
 
-#endif //IEEE802154_MAC_CONSTANTS_H
+#endif //E002F9B9_IEEE802154_MAC_CONSTANTS_H

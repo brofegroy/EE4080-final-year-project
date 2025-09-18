@@ -16,7 +16,7 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(FYP_1_beaconframe_test1);
 //-----------------
-#include "../common/ieee802154_mac_constants.h"
+#include "../common/E002F9B9_ieee802154_mac_constants.h"
 
 /*
 ASSUMPTIONS
