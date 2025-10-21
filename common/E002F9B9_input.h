@@ -13,7 +13,7 @@
 ///char line[CONFIG_CONSOLE_INPUT_MAX_LINE_LEN];
 ///getline_uart(uart_dev, line, sizeof(line));
 ///```
-///contents oh input will be inside the variable: line
+///contents of input will be inside the variable: line
 void getline_uart(const struct device *dev, char *buf, size_t max) {
     size_t i = 0;
     unsigned char c;

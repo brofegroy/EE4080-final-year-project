@@ -39,7 +39,7 @@ only generating the base beacon frame.
 */
 
 /* Default communication configuration. We use default non-STS DW mode. */
-static dwt_config_t config __unused= { //is actually used, __unused is to silence compiler warnings
+static dwt_config_t config = {
     9,               /* Channel number. */
     DWT_PLEN_128,    /* Preamble length. Used in TX only. */
     DWT_PAC8,        /* Preamble acquisition chunk size. Used in RX only. */
@@ -56,7 +56,7 @@ static dwt_config_t config __unused= { //is actually used, __unused is to silenc
                       *  Used in RX only. */
     DWT_STS_MODE_OFF, /* STS disabled */
     DWT_STS_LEN_64,/* STS length see allowed values in Enum dwt_sts_lengths_e */
-    DWT_PDOA_M0      /* PDOA mode off */
+    DWT_PDOA_M0,      /* PDOA mode off */
 };
 
 /* Index to access to sequence number of the blink frame in the tx_msg array. */
@@ -64,7 +64,7 @@ static dwt_config_t config __unused= { //is actually used, __unused is to silenc
 
 /* Inter-frame delay period, in milliseconds.
  * this example will try to transmit a frame every 100 ms*/
-#define TX_DELAY_MS 1000
+#define TX_DELAY_MS 2
 
 // no cca
 // /* Initial backoff period when failed to transmit a frame due to preamble detection. */
@@ -161,7 +161,7 @@ int app_main(void)
             E002F9B9_MAC__FCF__PAN_ID_COMPRESSION_1    | // assumed single PAN for this implementation, so no need pan ID
             E002F9B9_MAC__FCF__SEQUENCE_SUPPRESS_0     | // reccomended to have sequence number for duplicate detection/missing frames
             E002F9B9_MAC__FCF__IE_PRESENT_0            | // no need for IE in this implementation
-            E002F9B9_MAC__FCF__DST_ADDR_MODE_SHORT_10 | // beacon frames not require destination
+            E002F9B9_MAC__FCF__DEST_ADDR_MODE_SHORT_10 | // beacon frames not require destination
             E002F9B9_MAC__FCF__FRAME_VERSION_2020_10   | // self explanatory
             E002F9B9_MAC__FCF__SRC_ADDR_MODE_SHORT_01;   // can accomodate 65535 devices
 
@@ -191,7 +191,40 @@ int app_main(void)
             (uint8_t)(beacon_addressing_field_source_address & 0xFF),            // Src addr LSB
             (uint8_t)((beacon_addressing_field_source_address >> 8) & 0xFF),     // Src addr MSB
             (uint8_t)(beacon_addressing_field_destination_address & 0xFF),       // Dest addr LSB
-            (uint8_t)((beacon_addressing_field_destination_address >> 8) & 0xFF) // Dest addr MSB
+            (uint8_t)((beacon_addressing_field_destination_address >> 8) & 0xFF), // Dest addr MSB
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',//
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',//
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',//
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',//
+
         };
 
         if (SYS_STATUS_TXFRS_BIT_MASK)

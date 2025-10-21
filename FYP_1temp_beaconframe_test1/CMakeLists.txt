@@ -11,13 +11,13 @@ set(BOARD nrf5340dk_nrf5340_cpuapp)
 
 
 find_package(Zephyr)
-project(FYP_2_custom_payload) ####
+project(FYP_1_beaconframe_test1) ####
 
 #add_definitions(-DTX_WITH_CCA)
 
 target_sources(app PRIVATE ../../main.c)
 target_sources(app PRIVATE ../../config_options.c)
-target_sources(app PRIVATE FYP_2_custom_payload.c) #UPDATE THIS WHEN COPIED
+target_sources(app PRIVATE FYP_1_beaconframe_test1.c) #UPDATE THIS WHEN COPIED
 
 target_sources(app PRIVATE ../../decadriver/deca_device.c)
 

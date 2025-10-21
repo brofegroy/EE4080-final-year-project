@@ -17,6 +17,9 @@ LOG_MODULE_REGISTER(FYP_2_custom_payload);
 #include "../common/E002F9B9_input.h"
 #include "../common/E002F9B9_device_init.h"
 
+//current version:
+//can send custom payload from user
+
 /* Default communication configuration. We use default non-STS DW mode. */
 static dwt_config_t config = {
     9,               /* Channel number. */
@@ -80,7 +83,7 @@ int app_main(void)
         // Echo back
         printk("You typed: %s\n", line);
 
-        #pragma region cca
+        #pragma region custom payload
         ///Forming the frame to be sent
 
         //Forming the frame control field of the frame
@@ -92,7 +95,7 @@ int app_main(void)
             E002F9B9_MAC__FCF__PAN_ID_COMPRESSION_1    | // assumed single PAN for this implementation, so no need pan ID
             E002F9B9_MAC__FCF__SEQUENCE_SUPPRESS_0     | // reccomended to have sequence number for duplicate detection/missing frames
             E002F9B9_MAC__FCF__IE_PRESENT_0            | // no need for IE in this implementation
-            E002F9B9_MAC__FCF__DEST_ADDR_MODE_SHORT_10 | // beacon frames not require destination
+            E002F9B9_MAC__FCF__DST_ADDR_MODE_SHORT_10  | // beacon frames not require destination
             E002F9B9_MAC__FCF__FRAME_VERSION_2020_10   | // self explanatory
             E002F9B9_MAC__FCF__SRC_ADDR_MODE_SHORT_01;   // can accomodate 65535 devices
 
@@ -102,14 +105,30 @@ int app_main(void)
 
         //Security field omitted
 
+        //Superframe Specification Field
+        uint16_t beacon_superframe_specification_field =
+            E002F9B9_MAC__BSSF__BEACON_ORDER(1)              |  // beacon interval base period second fastest
+            E002F9B9_MAC__BSSF__SUPERFRAME_ORDER(0)          |  // active period = 1/2 beacon interval
+            E002F9B9_MAC__BSSF__FINAL_CAP_SLOT(15)           |  // full CAP, no GTS
+            E002F9B9_MAC__BSSF__BATTERY_LIFE_EXTENSION_0     |  // disabled for test clarity
+            E002F9B9_MAC__BSSF__IS_PAN_COORDINATOR_1         |  // this device is the PAN coordinator
+            E002F9B9_MAC__BSSF__ASSOCIATION_PERMIT_0;           // disallow devices to associate because not yet implemented
+
+        uint8_t beacon_custom_gts_specification_field =
+            E002F9B9_CUSTOM_GTS__DESCRIPTOR_COUNT(0) | //no GTS allocated
+            E002F9B9_CUSTOM_GTS__PERMIT_DENY_0;        //no allow slot request, not implemented
+
         uint8_t tx_msg_no_payload[] = {
-            (uint8_t)(beacon_frame_control_field & 0xFF),                        // FCF LSB
-            (uint8_t)((beacon_frame_control_field >> 8) & 0xFF),                 // FCF MSB
-            beacon_seq_num_field,                                                // Sequence number
-            (uint8_t)(beacon_addressing_field_source_address & 0xFF),            // Src addr LSB
-            (uint8_t)((beacon_addressing_field_source_address >> 8) & 0xFF),     // Src addr MSB
-            (uint8_t)(beacon_addressing_field_destination_address & 0xFF),       // Dest addr LSB
-            (uint8_t)((beacon_addressing_field_destination_address >> 8) & 0xFF) // Dest addr MSB
+            (uint8_t)(beacon_frame_control_field & 0xFF),                         // FCF LSB
+            (uint8_t)((beacon_frame_control_field >> 8) & 0xFF),                  // FCF MSB
+            beacon_seq_num_field,                                                 // Sequence number
+            (uint8_t)(beacon_addressing_field_source_address & 0xFF),             // Src addr LSB
+            (uint8_t)((beacon_addressing_field_source_address >> 8) & 0xFF),      // Src addr MSB
+            (uint8_t)(beacon_addressing_field_destination_address & 0xFF),        // Dest addr LSB
+            (uint8_t)((beacon_addressing_field_destination_address >> 8) & 0xFF), // Dest addr MSB
+            (uint8_t)(beacon_superframe_specification_field & 0xFF),              // Superframe spec LSB
+            (uint8_t)((beacon_superframe_specification_field >> 8) & 0xFF),       // Superframe spec MSB
+            beacon_custom_gts_specification_field                                 // custom GTS
         };
 
         uint8_t tx_msg[sizeof(tx_msg_no_payload) + line_len];
@@ -148,6 +167,6 @@ int app_main(void)
 
         /* Execute a delay between transmissions. */
         Sleep(tx_sleep_period);
-        #pragma endregion cca
+        #pragma endregion custom payload
     }
 }
